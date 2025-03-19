@@ -1,0 +1,481 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="./compiled/flipclock.css">
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="./compiled/flipclock.js"></script>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				transition: background-color 0.5s;
+				background-color: #f0f0f0;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+				overflow: hidden;
+			}
+			
+			.clock-container {
+				position: absolute;
+				transition: all 0.5s;
+				transform-origin: center;
+			}
+			
+			.settings-icon {
+				position: fixed;
+				left: 20px;
+				bottom: 20px;
+				width: 40px;
+				height: 40px;
+				background-color: rgba(0, 0, 0, 0.6);
+				border-radius: 50%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				cursor: pointer;
+				z-index: 1000;
+				transition: all 0.3s;
+			}
+			
+			.settings-icon:hover {
+				background-color: rgba(0, 0, 0, 0.8);
+			}
+			
+			.settings-icon svg {
+				width: 24px;
+				height: 24px;
+				fill: white;
+			}
+			
+			.fullscreen-icon {
+				position: fixed;
+				right: 20px;
+				bottom: 20px;
+				width: 40px;
+				height: 40px;
+				background-color: rgba(0, 0, 0, 0.6);
+				border-radius: 50%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				cursor: pointer;
+				z-index: 1000;
+				transition: all 0.3s;
+			}
+			
+			.fullscreen-icon:hover {
+				background-color: rgba(0, 0, 0, 0.8);
+			}
+			
+			.fullscreen-icon svg {
+				width: 24px;
+				height: 24px;
+				fill: white;
+			}
+			
+			.settings-panel {
+				position: fixed;
+				left: -300px;
+				bottom: 70px;
+				width: 280px;
+				background-color: rgba(0, 0, 0, 0.8);
+				border-radius: 8px;
+				padding: 15px;
+				color: white;
+				transition: left 0.3s;
+				z-index: 999;
+			}
+			
+			.settings-panel.open {
+				left: 20px;
+			}
+			
+			.settings-group {
+				margin-bottom: 15px;
+			}
+			
+			.settings-group h3 {
+				margin-top: 0;
+				margin-bottom: 10px;
+				font-size: 16px;
+				border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+				padding-bottom: 5px;
+			}
+			
+			.settings-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 8px;
+			}
+			
+			.settings-row label {
+				flex: 1;
+			}
+			
+			.settings-row input[type="range"] {
+				flex: 1;
+			}
+			
+			.settings-row input[type="color"] {
+				width: 30px;
+				height: 30px;
+				border: none;
+				padding: 0;
+				background: none;
+			}
+			
+			.position-controls {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 5px;
+				margin-top: 10px;
+			}
+			
+			.position-btn {
+				background-color: rgba(255, 255, 255, 0.2);
+				border: none;
+				color: white;
+				padding: 5px;
+				border-radius: 4px;
+				cursor: pointer;
+				transition: background-color 0.3s;
+			}
+			
+			.position-btn:hover {
+				background-color: rgba(255, 255, 255, 0.3);
+			}
+			
+			.position-btn.active {
+				background-color: rgba(255, 255, 255, 0.5);
+			}
+			
+			.settings-panel.light-mode .position-btn {
+				background-color: rgba(0, 0, 0, 0.2);
+				color: black;
+			}
+			
+			.settings-panel.light-mode .position-btn:hover {
+				background-color: rgba(0, 0, 0, 0.3);
+			}
+			
+			.settings-panel.light-mode .position-btn.active {
+				background-color: rgba(0, 0, 0, 0.5);
+			}
+			
+			.reset-button {
+				background-color: #e74c3c;
+				color: white;
+				border: none;
+				padding: 8px 12px;
+				border-radius: 4px;
+				cursor: pointer;
+				width: 100%;
+				margin-top: 15px;
+				transition: background-color 0.3s;
+			}
+			
+			.reset-button:hover {
+				background-color: #c0392b;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="clock-container">
+			<div class="clock"></div>
+		</div>
+		
+		<div class="settings-icon">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+				<path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+			</svg>
+		</div>
+		
+		<div class="fullscreen-icon">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+				<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+			</svg>
+		</div>
+		
+		<div class="settings-panel">
+			<div class="settings-group">
+				<h3>时钟设置</h3>
+				<div class="settings-row">
+					<label>显示秒</label>
+					<input type="checkbox" id="show-seconds" checked>
+				</div>
+				<div class="settings-row">
+					<label>时钟大小</label>
+					<input type="range" id="clock-size" min="50" max="500" value="100">
+				</div>
+			</div>
+			
+			<div class="settings-group">
+				<h3>位置设置</h3>
+				<div class="position-controls">
+					<button class="position-btn" data-position="top-left">↖</button>
+					<button class="position-btn" data-position="top-center">↑</button>
+					<button class="position-btn" data-position="top-right">↗</button>
+					<button class="position-btn" data-position="middle-left">←</button>
+					<button class="position-btn active" data-position="middle-center">·</button>
+					<button class="position-btn" data-position="middle-right">→</button>
+					<button class="position-btn" data-position="bottom-left">↙</button>
+					<button class="position-btn" data-position="bottom-center">↓</button>
+					<button class="position-btn" data-position="bottom-right">↘</button>
+				</div>
+			</div>
+			
+			<div class="settings-group">
+				<h3>颜色设置</h3>
+				<div class="settings-row">
+					<label>背景颜色</label>
+					<input type="color" id="bg-color" value="#f0f0f0">
+				</div>
+				<div class="settings-row">
+					<label>数字颜色</label>
+					<input type="color" id="digit-color" value="#cccccc">
+				</div>
+				<div class="settings-row">
+					<label>翻页页纸颜色</label>
+					<input type="color" id="flip-color" value="#333333">
+				</div>
+			</div>
+			
+			<button class="reset-button">重置设置</button>
+		</div>
+
+		<script type="text/javascript">
+			var clock;
+			var defaultSettings = {
+				showSeconds: true,
+				clockSize: 100,
+				position: 'middle-center',
+				backgroundColor: '#f0f0f0',
+				digitColor: '#cccccc',
+				flipColor: '#333333'
+			};
+			
+			$(document).ready(function() {
+				// 初始化时钟
+				initClock(defaultSettings.showSeconds);
+				
+				// 设置图标点击事件
+				$('.settings-icon').on('click', function() {
+					$('.settings-panel').toggleClass('open');
+				});
+				
+				// 显示/隐藏秒
+				$('#show-seconds').on('change', function() {
+					var showSeconds = $(this).prop('checked');
+					initClock(showSeconds);
+					// 重新应用颜色设置
+					applyClockColors($('#digit-color').val(), $('#flip-color').val());
+				});
+				
+				// 调整时钟大小
+				$('#clock-size').on('input', function() {
+					var size = $(this).val();
+					// 获取当前激活的位置按钮
+					var activePosition = $('.position-btn.active').data('position');
+					// 重新应用位置设置，这样会同时考虑缩放和位置
+					applyPosition(activePosition, size/100);
+				});
+				
+				// 设置背景颜色
+				$('#bg-color').on('input', function() {
+					updateTheme($(this).val());
+				});
+				
+				// 设置数字颜色
+				$('#digit-color').on('input', function() {
+					applyClockColors($(this).val(), $('#flip-color').val());
+				});
+				
+				// 设置翻页页纸颜色
+				$('#flip-color').on('input', function() {
+					applyClockColors($('#digit-color').val(), $(this).val());
+				});
+				
+				// 设置时钟位置
+				$('.position-btn').on('click', function() {
+					$('.position-btn').removeClass('active');
+					$(this).addClass('active');
+					
+					var position = $(this).data('position');
+					var scale = $('#clock-size').val()/100;
+					
+					// 应用位置设置
+					applyPosition(position, scale);
+				});
+				
+				// 全屏按钮点击事件
+				$('.fullscreen-icon').on('click', function() {
+					toggleFullScreen();
+				});
+				
+				// 重置按钮点击事件
+				$('.reset-button').on('click', function() {
+					resetToDefaults();
+				});
+				
+				// 初始化时钟位置为中央
+				$('.position-btn[data-position="middle-center"]').click();
+				
+				// 添加自定义样式类
+				$('.clock-container').addClass('custom-clock-style');
+				
+				// 添加页面可见性变化事件监听器
+				document.addEventListener('visibilitychange', handleVisibilityChange);
+			});
+			
+			// 处理页面可见性变化
+			function handleVisibilityChange() {
+				// 当页面重新变为可见时
+				if (!document.hidden) {
+					// 获取当前是否显示秒
+					var showSeconds = $('#show-seconds').prop('checked');
+					// 重新初始化时钟以同步当前时间
+					initClock(showSeconds);
+					// 重新应用颜色设置
+					applyClockColors($('#digit-color').val(), $('#flip-color').val());
+				}
+			}
+			
+			// 初始化时钟
+			function initClock(showSeconds) {
+				if (clock) {
+					clock.stop();
+				}
+				
+				clock = $('.clock').FlipClock({
+					clockFace: 'TwentyFourHourClock',
+					showSeconds: showSeconds
+				});
+			}
+			
+			// 应用时钟颜色
+			function applyClockColors(digitColor, flipColor) {
+			    // 设置自定义CSS变量或直接修改样式
+			    $('<style>')
+			        .prop('type', 'text/css')
+			        .html(`
+			            .flip-clock-wrapper ul li a div div.inn {
+			                color: ${digitColor} !important;
+			                background-color: ${flipColor} !important;
+			            }
+			            .flip-clock-divider .flip-clock-dot {
+			                background-color: ${digitColor} !important;
+			            }
+			        `)
+			        .appendTo('head');
+			}
+			
+			// 应用位置和缩放
+			function applyPosition(position, scale) {
+				var container = $('.clock-container');
+				
+				// 重置位置
+				container.css({
+					'top': '',
+					'bottom': '',
+					'left': '',
+					'right': '',
+					'transform': ''
+				});
+				
+				// 设置新位置和缩放
+				switch(position) {
+					case 'top-left':
+						container.css({'top': '20px', 'left': '20px', 'transform': 'scale(' + scale + ')', 'transform-origin': 'top left'});
+						break;
+					case 'top-center':
+						container.css({'top': '20px', 'left': '50%', 'transform': 'translateX(-50%) scale(' + scale + ')', 'transform-origin': 'top center'});
+						break;
+					case 'top-right':
+						container.css({'top': '20px', 'right': '20px', 'transform': 'scale(' + scale + ')', 'transform-origin': 'top right'});
+						break;
+					case 'middle-left':
+						container.css({'top': '50%', 'left': '20px', 'transform': 'translateY(-50%) scale(' + scale + ')', 'transform-origin': 'center left'});
+						break;
+					case 'middle-center':
+						container.css({'top': '50%', 'left': '50%', 'transform': 'translate(-50%, -50%) scale(' + scale + ')', 'transform-origin': 'center'});
+						break;
+					case 'middle-right':
+						container.css({'top': '50%', 'right': '20px', 'transform': 'translateY(-50%) scale(' + scale + ')', 'transform-origin': 'center right'});
+						break;
+					case 'bottom-left':
+						container.css({'bottom': '20px', 'left': '20px', 'transform': 'scale(' + scale + ')', 'transform-origin': 'bottom left'});
+						break;
+					case 'bottom-center':
+						container.css({'bottom': '20px', 'left': '50%', 'transform': 'translateX(-50%) scale(' + scale + ')', 'transform-origin': 'bottom center'});
+						break;
+					case 'bottom-right':
+						container.css({'bottom': '20px', 'right': '20px', 'transform': 'scale(' + scale + ')', 'transform-origin': 'bottom right'});
+						break;
+				}
+			}
+			
+			// 切换全屏模式
+			function toggleFullScreen() {
+				if (!document.fullscreenElement &&    // alternative standard method
+					!document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
+					if (document.documentElement.requestFullscreen) {
+						document.documentElement.requestFullscreen();
+					} else if (document.documentElement.msRequestFullscreen) {
+						document.documentElement.msRequestFullscreen();
+					} else if (document.documentElement.mozRequestFullScreen) {
+						document.documentElement.mozRequestFullScreen();
+					} else if (document.documentElement.webkitRequestFullscreen) {
+						document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+					}
+				}
+			}
+			
+			// 更新主题颜色
+			function updateTheme(color) {
+				$('body').css('background-color', color);
+				
+				// 根据背景颜色亮度调整设置面板颜色
+				var r = parseInt(color.substr(1, 2), 16);
+				var g = parseInt(color.substr(3, 2), 16);
+				var b = parseInt(color.substr(5, 2), 16);
+				var brightness = (r * 299 + g * 587 + b * 114) / 1000;
+				
+				if (brightness > 128) {
+					$('.settings-panel').css('background-color', 'rgba(0, 0, 0, 0.8)');
+					$('.settings-panel').css('color', 'white');
+					$('.settings-panel').removeClass('light-mode');
+				} else {
+					$('.settings-panel').css('background-color', 'rgba(255, 255, 255, 0.8)');
+					$('.settings-panel').css('color', 'black');
+					$('.settings-panel').addClass('light-mode');
+				}
+			}
+			
+			// 重置为默认设置
+			function resetToDefaults() {
+				// 重置显示秒数设置
+				$('#show-seconds').prop('checked', defaultSettings.showSeconds);
+				initClock(defaultSettings.showSeconds);
+				
+				// 重置时钟大小
+				$('#clock-size').val(defaultSettings.clockSize);
+				
+				// 重置位置
+				$('.position-btn').removeClass('active');
+				$('.position-btn[data-position="' + defaultSettings.position + '"]').addClass('active');
+				applyPosition(defaultSettings.position, defaultSettings.clockSize/100);
+				
+				// 重置背景颜色
+				$('#bg-color').val(defaultSettings.backgroundColor);
+				updateTheme(defaultSettings.backgroundColor);
+				
+				// 重置时钟颜色
+				$('#digit-color').val(defaultSettings.digitColor);
+				$('#flip-color').val(defaultSettings.flipColor);
+				applyClockColors(defaultSettings.digitColor, defaultSettings.flipColor);
+			}
+		</script>
+	</body>
+</html>
