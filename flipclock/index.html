@@ -1,8 +1,62 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="./compiled/flipclock.css">
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script> -->
+		<script src="https://cdn.bytedstatic.com/libs/jquery/1.10.2/jquery.min.js"></script>
+		<!-- <script>
+		(function() {
+		    var sources = [
+		        // 国际源（默认优先）
+		        'https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js',
+		      
+		        // 国内备案CDN源（按稳定性排序）
+		        'https://cdn.bytedstatic.com/libs/jquery/1.10.2/jquery.min.js',        // 字节跳动
+		        'https://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js',             // 百度
+		        'https://cdn.bootcdn.net/ajax/libs/jquery/1.10.2/jquery.min.js',       // BootCDN
+		        'https://cdnjs.loli.net/ajax/libs/jquery/1.10.2/jquery.min.js',        // 国内镜像
+		        'https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js'               // 又拍云
+		    ];
+
+		    var loadSuccess = false;
+		    var TIMEOUT = 2000; // 2秒超时
+
+		    function tryLoad(index) {
+		        if (index >= sources.length) return;
+
+		        var script = document.createElement('script');
+		        script.src = sources[index];
+		        script.onload = function() {
+		            if (!loadSuccess) {
+		                loadSuccess = true;
+		                console.log('Loaded from: ' + sources[index]);
+		            }
+		        };
+		        script.onerror = function() {
+		            console.warn('Failed to load: ' + sources[index]);
+		            tryLoad(index + 1);
+		        };
+
+		        // 超时强制切换
+		        setTimeout(function() {
+		            if (!loadSuccess && !script.getAttribute('data-loaded')) {
+		                console.warn('Timeout on: ' + sources[index]);
+		                script.parentNode.removeChild(script);
+		                tryLoad(index + 1);
+		            }
+		        }, TIMEOUT);
+
+		        document.head.appendChild(script);
+		        script.setAttribute('data-attempt-index', index);
+		    }
+
+		    // 开始加载
+		    tryLoad(0);
+		})();
+		</script> -->
+
 		<script src="./compiled/flipclock.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+
 		<style>
 			body {
 				margin: 0;
@@ -76,7 +130,7 @@
 			
 			.settings-panel {
 				position: fixed;
-				left: -300px;
+				left: -310px;
 				bottom: 70px;
 				width: 280px;
 				background-color: rgba(0, 0, 0, 0.8);
@@ -255,10 +309,80 @@
 				digitColor: '#cccccc',
 				flipColor: '#333333'
 			};
+
+			var currentSettings = {...defaultSettings}; // 克隆默认设置
+
+		    // 保存设置到localStorage
+		    function saveSettings() {
+		        const settingsToSave = {
+		            showSeconds: $('#show-seconds').prop('checked'),
+		            clockSize: parseInt($('#clock-size').val()),
+		            position: $('.position-btn.active').data('position'),
+		            backgroundColor: $('#bg-color').val(),
+		            digitColor: $('#digit-color').val(),
+		            flipColor: $('#flip-color').val()
+		        };
+
+		        const yamlData = jsyaml.dump(settingsToSave);
+		        localStorage.setItem('clockSettings', yamlData);
+		    }
+
+		    // 从localStorage加载设置
+		    function loadSettings() {
+		        const yamlData = localStorage.getItem('clockSettings');
+		        if (yamlData) {
+		            try {
+		                const savedSettings = jsyaml.load(yamlData);
+		              
+		                // 应用加载的设置
+		                if (savedSettings.showSeconds !== undefined) {
+		                    $('#show-seconds').prop('checked', savedSettings.showSeconds);
+		                    currentSettings.showSeconds = savedSettings.showSeconds;
+		                }
+		              
+		                if (savedSettings.clockSize) {
+		                    $('#clock-size').val(savedSettings.clockSize);
+		                    currentSettings.clockSize = savedSettings.clockSize;
+		                }
+		              
+		                if (savedSettings.position) {
+		                    $(`.position-btn[data-position="${savedSettings.position}"]`).click();
+		                    currentSettings.position = savedSettings.position;
+		                }
+		              
+		                if (savedSettings.backgroundColor) {
+		                    $('#bg-color').val(savedSettings.backgroundColor);
+		                    currentSettings.backgroundColor = savedSettings.backgroundColor;
+		                }
+		              
+		                if (savedSettings.digitColor) {
+		                    $('#digit-color').val(savedSettings.digitColor);
+		                    currentSettings.digitColor = savedSettings.digitColor;
+		                }
+		              
+		                if (savedSettings.flipColor) {
+		                    $('#flip-color').val(savedSettings.flipColor);
+		                    currentSettings.flipColor = savedSettings.flipColor;
+		                }
+
+		                // 应用所有设置
+		                initClock(currentSettings.showSeconds);
+		                applyPosition(currentSettings.position, currentSettings.clockSize/100);
+		                updateTheme(currentSettings.backgroundColor);
+		                applyClockColors(currentSettings.digitColor, currentSettings.flipColor);
+
+		            } catch (e) {
+		                console.error('Error parsing saved settings:', e);
+		            }
+		        }
+		    }
 			
 			$(document).ready(function() {
 				// 初始化时钟
 				initClock(defaultSettings.showSeconds);
+
+				// 加载已保存的设置
+        		loadSettings();
 				
 				// 设置图标点击事件
 				$('.settings-icon').on('click', function() {
@@ -271,6 +395,7 @@
 					initClock(showSeconds);
 					// 重新应用颜色设置
 					applyClockColors($('#digit-color').val(), $('#flip-color').val());
+					saveSettings(); 
 				});
 				
 				// 调整时钟大小
@@ -280,21 +405,25 @@
 					var activePosition = $('.position-btn.active').data('position');
 					// 重新应用位置设置，这样会同时考虑缩放和位置
 					applyPosition(activePosition, size/100);
+					saveSettings(); 
 				});
 				
 				// 设置背景颜色
 				$('#bg-color').on('input', function() {
 					updateTheme($(this).val());
+					saveSettings(); 
 				});
 				
 				// 设置数字颜色
 				$('#digit-color').on('input', function() {
 					applyClockColors($(this).val(), $('#flip-color').val());
+					saveSettings(); 
 				});
 				
 				// 设置翻页页纸颜色
 				$('#flip-color').on('input', function() {
 					applyClockColors($('#digit-color').val(), $(this).val());
+					saveSettings(); 
 				});
 				
 				// 设置时钟位置
@@ -307,6 +436,7 @@
 					
 					// 应用位置设置
 					applyPosition(position, scale);
+					saveSettings(); 
 				});
 				
 				// 全屏按钮点击事件
@@ -317,6 +447,7 @@
 				// 重置按钮点击事件
 				$('.reset-button').on('click', function() {
 					resetToDefaults();
+					localStorage.removeItem('clockSettings'); // 新增
 				});
 				
 				// 初始化时钟位置为中央
@@ -475,6 +606,7 @@
 				$('#digit-color').val(defaultSettings.digitColor);
 				$('#flip-color').val(defaultSettings.flipColor);
 				applyClockColors(defaultSettings.digitColor, defaultSettings.flipColor);
+				localStorage.removeItem('clockSettings'); // 新增
 			}
 		</script>
 	</body>
