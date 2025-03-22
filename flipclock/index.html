@@ -10,7 +10,6 @@
 		        'https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js',
 		      
 		        // 国内备案CDN源（按稳定性排序）
-		        'https://cdn.bytedstatic.com/libs/jquery/1.10.2/jquery.min.js',        // 字节跳动
 		        'https://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js',             // 百度
 		        'https://cdn.bootcdn.net/ajax/libs/jquery/1.10.2/jquery.min.js',       // BootCDN
 		        'https://cdnjs.loli.net/ajax/libs/jquery/1.10.2/jquery.min.js',        // 国内镜像
@@ -74,6 +73,33 @@
 				position: absolute;
 				transition: all 0.5s;
 				transform-origin: center;
+			}
+
+			.flip-clock-wrapper {
+			  /* 强制横向排列不换行 */
+			  display: flex !important;
+			  flex-wrap: nowrap !important;
+			  overflow-x: auto; /* 允许横向滚动 */
+			  justify-content: center;
+			}
+
+			/* 时分秒容器 */
+			.flip-clock-wrapper ul {
+			  flex-shrink: 0 !important; /* 禁止缩小 */
+			  margin: 0 2px !important;  /* 调整间距 */
+			}
+
+			/* 移动端适配 */
+			@media (max-width: 480px) {
+			  .flip-clock-wrapper {
+			    transform: scale(0.8); /* 适当缩小整体尺寸 */
+			  }
+
+			  /* 隐藏不必要元素 */
+			  .flip-clock-divider.hours,
+			  .flip-clock-divider.minutes {
+			    display: none !important;
+			  }
 			}
 			
 			.settings-icon {
