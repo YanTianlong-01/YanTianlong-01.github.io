@@ -1,58 +1,9 @@
 <html>
 	<head>
+		<meta charset="UTF-8">
 		<link rel="stylesheet" href="./compiled/flipclock.css">
 		<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script> -->
 		<script src="https://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
-		<!-- <script>
-		(function() {
-		    var sources = [
-		        // 国际源（默认优先）
-		        'https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js',
-		      
-		        // 国内备案CDN源（按稳定性排序）
-		        'https://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js',             // 百度
-		        'https://cdn.bootcdn.net/ajax/libs/jquery/1.10.2/jquery.min.js',       // BootCDN
-		        'https://cdnjs.loli.net/ajax/libs/jquery/1.10.2/jquery.min.js',        // 国内镜像
-		        'https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js'               // 又拍云
-		    ];
-
-		    var loadSuccess = false;
-		    var TIMEOUT = 2000; // 2秒超时
-
-		    function tryLoad(index) {
-		        if (index >= sources.length) return;
-
-		        var script = document.createElement('script');
-		        script.src = sources[index];
-		        script.onload = function() {
-		            if (!loadSuccess) {
-		                loadSuccess = true;
-		                console.log('Loaded from: ' + sources[index]);
-		            }
-		        };
-		        script.onerror = function() {
-		            console.warn('Failed to load: ' + sources[index]);
-		            tryLoad(index + 1);
-		        };
-
-		        // 超时强制切换
-		        setTimeout(function() {
-		            if (!loadSuccess && !script.getAttribute('data-loaded')) {
-		                console.warn('Timeout on: ' + sources[index]);
-		                script.parentNode.removeChild(script);
-		                tryLoad(index + 1);
-		            }
-		        }, TIMEOUT);
-
-		        document.head.appendChild(script);
-		        script.setAttribute('data-attempt-index', index);
-		    }
-
-		    // 开始加载
-		    tryLoad(0);
-		})();
-		</script> -->
-
 		<script src="./compiled/flipclock.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 
