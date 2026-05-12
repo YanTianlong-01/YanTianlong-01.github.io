@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Qwen3.6-27B Quantized Versions · BFCL-v3 Evaluation Visualization</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js">
+</script>
+<script src="models_metadata.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-soft: #171a23;
+    --bg-card: #1c2030;
+    --border: #2a2f42;
+    --text: #e7eaf3;
+    --text-soft: #aab0c0;
+    --accent: #7aa2ff;
+    --accent-2: #79e2c1;
+    --warn: #ffb86b;
+    --bad: #ff8b8b;
+    --shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  header .titles { flex: 1; min-width: 0; }
+
+  header h1 {
+    font-size: 26px;
+    margin: 0 0 6px;
+    letter-spacing: 0.3px;
+  }
+
+  header p {
+    color: var(--text-soft);
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .lang-toggle {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .lang-toggle label {
+    font-size: 12px;
+    color: var(--text-soft);
+  }
+
+  .lang-toggle button {
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-soft);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+
+  .lang-toggle button.active {
+    background: var(--accent);
+    color: #0b1020;
+    border-color: var(--accent);
+  }
+
+  .section-title {
+    font-size: 18px;
+    margin: 36px 0 14px;
+    border-left: 3px solid var(--accent);
+    padding-left: 10px;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card .rank-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--accent);
+    color: #0b1020;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  .card .rank-badge.gold { background: #f5c451; }
+  .card .rank-badge.silver { background: #cdd5e0; }
+  .card .rank-badge.bronze { background: #d59164; }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .card h3 {
+    flex: 1;
+    min-width: 0;
+    word-break: break-all;
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .card .rank-badge {
+    position: relative;
+    top: auto;
+    right: auto;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .card .score {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 6px 0 4px;
+    color: var(--accent-2);
+  }
+
+  .card .score-label {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-bottom: 12px;
+  }
+
+  .card .meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    font-size: 12px;
+    color: var(--text-soft);
+  }
+
+  .card .meta strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 960px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  .chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px 22px;
+    box-shadow: var(--shadow);
+  }
+
+  .chart-card h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 360px;
+  }
+
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  table.data-table th, table.data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  table.data-table th {
+    background: var(--bg-soft);
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  table.data-table th.sorted-asc::after { content: " ▲"; color: var(--accent); }
+  table.data-table th.sorted-desc::after { content: " ▼"; color: var(--accent); }
+
+  table.data-table tr:hover td {
+    background: rgba(122, 162, 255, 0.05);
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: rgba(122, 162, 255, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(122, 162, 255, 0.3);
+  }
+
+  .pill.good { background: rgba(121, 226, 193, 0.12); color: var(--accent-2); border-color: rgba(121, 226, 193, 0.3); }
+  .pill.warn { background: rgba(255, 184, 107, 0.12); color: var(--warn); border-color: rgba(255, 184, 107, 0.3); }
+  .pill.bad  { background: rgba(255, 139, 139, 0.12); color: var(--bad); border-color: rgba(255, 139, 139, 0.3); }
+
+  .footer-note {
+    margin-top: 24px;
+    color: var(--text-soft);
+    font-size: 12px;
+  }
+
+  .legend-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .legend-tags .tag {
+    font-size: 12px;
+    background: rgba(122, 162, 255, 0.08);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(122, 162, 255, 0.3);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="titles">
+    <h1 data-i18n="title">Qwen3.6-27B Quantized Versions · BFCL-v3 Evaluation Visualization</h1>
+    <p data-i18n="subtitle">174 test samples</p>
+  </div>
+  <div class="lang-toggle">
+    <label>Language:</label>
+    <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+    <button id="btn-zh" onclick="setLang('zh')">中文</button>
+  </div>
+</header>
+
+<div class="legend-tags" id="legend-tags">
+  <span class="tag" data-i18n="tag_local">Local OpenAI API @ 1235</span>
+  <span class="tag" data-i18n="tag_eval">EvalScope BFCL-v3</span>
+  <span class="tag" data-i18n="tag_type">Agent / Function Calling</span>
+  <span class="tag" data-i18n="tag_temp">temperature = 0</span>
+</div>
+
+<h2 class="section-title" data-i18n="sec_overview">Overview</h2>
+<div class="cards" id="cards"></div>
+
+<h2 class="section-title" data-i18n="sec_capability">Capability Comparison</h2>
+<div class="grid-2">
+  <div class="chart-card">
+    <h4 data-i18n="chart_radar">Accuracy Radar Chart</h4>
+    <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h4 data-i18n="chart_subset_bar">Subset Accuracy Comparison</h4>
+    <div class="chart-wrap"><canvas id="subsetBar"></canvas></div>
+  </div>
+</div>
+
+<h2 class="section-title" data-i18n="sec_perf">Performance Metrics</h2>
+<div class="grid-2">
+  <div class="chart-card">
+    <h4 data-i18n="chart_speed">Speed: Prefill vs Decode</h4>
+    <div class="chart-wrap"><canvas id="speedBar"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h4 data-i18n="chart_resource">VRAM Usage & Completion Time</h4>
+    <div class="chart-wrap"><canvas id="resBar"></canvas></div>
+  </div>
+</div>
+
+<h2 class="section-title" data-i18n="sec_table">Full Data (click headers to sort)</h2>
+<table class="data-table" id="dataTable">
+  <thead>
+    <tr>
+      <th data-key="model" data-i18n="th_model">Model</th>
+      <th data-key="overall" data-num="1" data-i18n="th_overall">OVERALL</th>
+      <th data-key="parallel_multiple" data-num="1" data-i18n="th_pm">PM</th>
+      <th data-key="javascript" data-num="1" data-i18n="th_js">JS</th>
+      <th data-key="live_parallel_multiple" data-num="1" data-i18n="th_lpm">LPM</th>
+      <th data-key="irrelevance" data-num="1" data-i18n="th_irrel">irrelevance</th>
+      <th data-key="multi_turn_base" data-num="1" data-i18n="th_mtb">MTB</th>
+      <th data-key="multi_turn_long_context" data-num="1" data-i18n="th_mtlc">MTLC</th>
+      <th data-key="vram" data-num="1" data-i18n="th_vram">VRAM (GB)</th>
+      <th data-key="ctx" data-num="1" data-i18n="th_ctx">Context (k)</th>
+      <th data-key="time" data-i18n="th_time">Completion Time</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<p class="footer-note" data-i18n-html="footer_note">
+  Note: MTB = Multi-Turn Base; PM = Parallel Multiple; LPM = Live Parallel Multiple; JS = JavaScript. MTB score is shown as "-" if not tested; OVERALL accuracy is based on the first 4 subsets.<br>
+  Completion time refers to overall evaluation duration, not per-instance latency.
+</p>
+
+</div>
+
+<script>
+// ----- i18n -----
+const i18n = {
+  en: {
+    title: "Qwen3.6-27B Quantized Versions · BFCL-v3 Evaluation Visualization",
+    subtitle: "174 test samples",
+    tag_local: "Local OpenAI API @ 1235",
+    tag_eval: "EvalScope BFCL-v3",
+    tag_type: "Agent / Function Calling",
+    tag_temp: "temperature = 0",
+    sec_overview: "Overview",
+    sec_capability: "Capability Comparison",
+    sec_perf: "Performance Metrics",
+    sec_table: "Full Data (click headers to sort)",
+    chart_radar: "Accuracy Radar Chart",
+    chart_subset_bar: "Subset Accuracy Comparison",
+    chart_speed: "Speed: Prefill vs Decode",
+    chart_resource: "VRAM Usage & Completion Time",
+    th_model: "Model",
+    th_overall: "OVERALL",
+    th_pm: "PM",
+    th_js: "JS",
+    th_lpm: "LPM",
+    th_irrel: "irrelevance",
+    th_mtb: "MTB",
+    th_mtlc: "MTLC",
+    th_prefill: "Prefill (t/s)",
+    th_decode: "Decode (t/s)",
+    th_vram: "VRAM (GB)",
+    th_ctx: "Context (k)",
+    th_time: "Completion Time",
+    footer_note: "Note: MTB = Multi-Turn Base; MTLC = Multi-Turn Long Context; PM = Parallel Multiple; LPM = Live Parallel Multiple; JS = JavaScript. MTB/MTLC score is shown as \"-\" if not tested; OVERALL accuracy is based on the first 4 subsets.<br>Completion time refers to overall evaluation duration, not per-instance latency.",
+    label_prefill: "Prefill",
+    label_decode: "Decode",
+    label_vram: "VRAM (GB)",
+    label_time: "Completion Time (min)",
+    label_overall: "OVERALL accuracy",
+    label_non_live: "NON_LIVE",
+    label_live: "LIVE",
+    label_duration: "Duration",
+    label_multi_turn: "multi_turn_base",
+    na: "-"
+  },
+  zh: {
+    title: "Qwen3.6-27B 量化版本 · BFCL-v3 评测可视化",
+    subtitle: "174 个测试样本",
+    tag_local: "本地 OpenAI API @ 1235",
+    tag_eval: "EvalScope BFCL-v3",
+    tag_type: "Agent / 函数调用",
+    tag_temp: "temperature = 0",
+    sec_overview: "概览",
+    sec_capability: "能力对比",
+    sec_perf: "性能指标",
+    sec_table: "完整数据（点击表头排序）",
+    chart_radar: "准确率雷达图",
+    chart_subset_bar: "子集准确率对比",
+    chart_speed: "速度：Prefill vs Decode",
+    chart_resource: "显存占用 & 完成时间",
+    th_model: "模型",
+    th_overall: "总分",
+    th_pm: "PM",
+    th_js: "JS",
+    th_lpm: "LPM",
+    th_irrel: "irrelevance",
+    th_mtb: "MTB",
+    th_mtlc: "MTLC",
+    th_prefill: "Prefill (t/s)",
+    th_decode: "Decode (t/s)",
+    th_vram: "VRAM (GB)",
+    th_ctx: "上下文 (k)",
+    th_time: "完成时间",
+    footer_note: "注：MTB = 多轮对话基础；MTLC = 多轮长上下文；PM = 并行多函数调用；LPM = 实时并行多函数调用；JS = JavaScript。MTB/MTLC 分数未测试时显示为 \"-\"；OVERALL 总分基于前 4 个子集。<br>完成时间指整体评测时长，非单次延迟。",
+    label_prefill: "Prefill",
+    label_decode: "Decode",
+    label_vram: "VRAM (GB)",
+    label_time: "完成时间 (分钟)",
+    label_overall: "总分准确率",
+    label_non_live: "NON_LIVE",
+    label_live: "LIVE",
+    label_duration: "耗时",
+    label_multi_turn: "multi_turn_base",
+    na: "-"
+  }
+};
+
+let currentLang = 'en';
+let charts = {};
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+  applyI18n();
+  reRender();
+}
+
+function applyI18n() {
+  const t = i18n[currentLang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.dataset.i18nHtml;
+    if (t[key]) el.innerHTML = t[key];
+  });
+}
+
+// ----- helpers -----
+const palette = [
+  "#7aa2ff","#79e2c1","#f5c451","#ff8b8b",
+  "#c39bff","#ff9f43","#54a0ff","#5f27cd",
+  "#e056fd","#ff6b6b","#48dbfb","#1dd1a1",
+];
+
+const SUBSET_ORDER = [
+  'parallel_multiple',
+  'javascript',
+  'live_parallel_multiple',
+  'irrelevance',
+  'multi_turn_base',
+  'multi_turn_long_context'
+];
+
+function getAllSubsets() {
+  const subsets = new Set();
+  models_data.forEach(m => {
+    if (m.scores) {
+      Object.keys(m.scores).forEach(k => subsets.add(k));
+    }
+  });
+  // Return in defined order, then any unknown subsets alphabetically
+  const ordered = SUBSET_ORDER.filter(s => subsets.has(s));
+  const remaining = Array.from(subsets).filter(s => !SUBSET_ORDER.includes(s)).sort();
+  return [...ordered, ...remaining];
+}
+
+function getScore(m, key) {
+  if (!m.scores) return null;
+  return m.scores[key] ?? null;
+}
+
+function timeToMin(s) {
+  const parts = String(s).split(":").map(Number);
+  if (parts.length === 3) {
+    const [h, m, sec] = parts;
+    return h * 60 + m + sec / 60;
+  }
+  const [m, sec] = parts;
+  return (m || 0) + (sec || 0) / 60;
+}
+
+function fmtPct(v) {
+  if (v === null || v === undefined) return i18n[currentLang].na;
+  return (v * 100).toFixed(2) + "%";
+}
+
+function pillFor(v) {
+  if (v === null || v === undefined) return `<span class="pill warn">${i18n[currentLang].na}</span>`;
+  if (v >= 0.85) return `<span class="pill good">${fmtPct(v)}</span>`;
+  if (v >= 0.75) return `<span class="pill">${fmtPct(v)}</span>`;
+  if (v >= 0.70) return `<span class="pill warn">${fmtPct(v)}</span>`;
+  return `<span class="pill bad">${fmtPct(v)}</span>`;
+}
+
+function destroyCharts() {
+  Object.values(charts).forEach(c => { if (c) c.destroy(); });
+  charts = {};
+}
+
+// ----- 1. Overview cards -----
+function renderCards() {
+  const container = document.getElementById("cards");
+  container.innerHTML = "";
+  const t = i18n[currentLang];
+  const sorted = [...models_data].sort((a, b) => b.overall - a.overall);
+
+  sorted.forEach((m, idx) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    let rankClass = "";
+    if (idx === 0) rankClass = "gold";
+    else if (idx === 1) rankClass = "silver";
+    else if (idx === 2) rankClass = "bronze";
+
+    const pm = getScore(m, 'parallel_multiple');
+    const js = getScore(m, 'javascript');
+    const lpm = getScore(m, 'live_parallel_multiple');
+    const nonLive = (pm !== null && js !== null) ? ((pm + js) / 2).toFixed(4) : null;
+    const live = getScore(m, 'live_parallel_multiple');
+
+    card.innerHTML = `
+      <div class="card-header">
+        <h3>${m.model}</h3>
+        <div class="rank-badge ${rankClass}">#${idx + 1}</div>
+      </div>
+      <div class="score">${(m.overall * 100).toFixed(2)}<span style="font-size:14px;color:var(--text-soft)">%</span></div>
+      <div class="score-label">${t.label_overall}</div>
+      <div class="meta">
+        <div>${t.label_prefill}</div><div><strong>${m.prefill} t/s</strong></div>
+        <div>${t.label_decode}</div><div><strong>${m.decode} t/s</strong></div>
+        <div>${t.th_vram}</div><div><strong>${m.vram} GB</strong></div>
+        <div>${t.th_ctx}</div><div><strong>${m.ctx}k</strong></div>
+        <div>${t.label_duration}</div><div><strong>${m.time}</strong></div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ----- 2. Radar chart -----
+function renderRadar() {
+  const ctx = document.getElementById("radarChart");
+  const subsets = getAllSubsets().filter(s => s !== 'multi_turn_base' && s !== 'multi_turn_long_context');
+
+  const datasets = models_data.map((m, i) => ({
+    label: m.short,
+    data: subsets.map(s => getScore(m, s) ?? 0),
+    borderColor: palette[i % palette.length],
+    backgroundColor: palette[i % palette.length] + "33",
+    pointBackgroundColor: palette[i % palette.length],
+    borderWidth: 2,
+    fill: true,
+    tension: 0.1,
+  }));
+
+  charts.radar = new Chart(ctx, {
+    type: "radar",
+    data: { labels: subsets, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          suggestedMin: 0.6,
+          suggestedMax: 1,
+          ticks: {
+            color: "#aab0c0",
+            backdropColor: "transparent",
+            stepSize: 0.05,
+            callback: v => (v * 100).toFixed(0) + "%",
+          },
+          grid: { color: "#2a2f42" },
+          angleLines: { color: "#2a2f42" },
+          pointLabels: { color: "#e7eaf3", font: { size: 12 } },
+        },
+      },
+      plugins: {
+        legend: {
+          labels: { color: "#e7eaf3", boxWidth: 14 },
+          position: "bottom",
+        },
+        tooltip: {
+          callbacks: {
+            label: c => `${c.dataset.label}: ${(c.parsed.r * 100).toFixed(2)}%`,
+          },
+        },
+      },
+    },
+  });
+}
+
+// ----- 3. Subset bar chart -----
+function renderSubsetBar() {
+  const ctx = document.getElementById("subsetBar");
+  const subsets = getAllSubsets().filter(s => s !== 'multi_turn_base' && s !== 'multi_turn_long_context');
+
+  const datasets = models_data.map((m, i) => ({
+    label: m.short,
+    data: subsets.map(s => getScore(m, s) ?? 0),
+    backgroundColor: palette[i % palette.length],
+    borderRadius: 4,
+  }));
+
+  charts.subset = new Chart(ctx, {
+    type: "bar",
+    data: { labels: subsets, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { color: "#aab0c0" }, grid: { color: "#2a2f42" } },
+        y: {
+          beginAtZero: false,
+          min: 0.6,
+          max: 1,
+          ticks: {
+            color: "#aab0c0",
+            callback: v => (v * 100).toFixed(0) + "%",
+          },
+          grid: { color: "#2a2f42" },
+        },
+      },
+      plugins: {
+        legend: {
+          labels: { color: "#e7eaf3", boxWidth: 14 },
+          position: "bottom",
+        },
+        tooltip: {
+          callbacks: {
+            label: c => `${c.dataset.label}: ${(c.parsed.y * 100).toFixed(2)}%`,
+          },
+        },
+      },
+    },
+  });
+}
+
+// ----- 4. Speed chart -----
+function renderSpeedBar() {
+  const ctx = document.getElementById("speedBar");
+  const t = i18n[currentLang];
+  const labels = models_data.map(m => m.short);
+
+  charts.speed = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: t.label_prefill + " (t/s)",
+          data: models_data.map(m => m.prefill),
+          backgroundColor: "#7aa2ff",
+          borderRadius: 4,
+          yAxisID: "yPrefill",
+        },
+        {
+          label: t.label_decode + " (t/s)",
+          data: models_data.map(m => m.decode),
+          backgroundColor: "#79e2c1",
+          borderRadius: 4,
+          yAxisID: "yDecode",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { color: "#aab0c0" }, grid: { color: "#2a2f42" } },
+        yPrefill: {
+          type: "linear",
+          position: "left",
+          beginAtZero: true,
+          ticks: { color: "#7aa2ff" },
+          grid: { color: "#2a2f42" },
+        },
+        yDecode: {
+          type: "linear",
+          position: "right",
+          beginAtZero: true,
+          ticks: { color: "#79e2c1" },
+          grid: { display: false },
+        },
+      },
+      plugins: {
+        legend: { labels: { color: "#e7eaf3", boxWidth: 14 }, position: "bottom" },
+      },
+    },
+  });
+}
+
+// ----- 5. Resource chart -----
+function renderResBar() {
+  const ctx = document.getElementById("resBar");
+  const t = i18n[currentLang];
+  const labels = models_data.map(m => m.short);
+
+  charts.res = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: t.label_vram,
+          data: models_data.map(m => m.vram),
+          backgroundColor: "#f5c451",
+          borderRadius: 4,
+          yAxisID: "yVram",
+        },
+        {
+          label: t.label_time,
+          data: models_data.map(m => timeToMin(m.time)),
+          backgroundColor: "#ff8b8b",
+          borderRadius: 4,
+          yAxisID: "yTime",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { color: "#aab0c0" }, grid: { color: "#2a2f42" } },
+        yVram: {
+          type: "linear",
+          position: "left",
+          beginAtZero: true,
+          ticks: { color: "#f5c451" },
+          grid: { color: "#2a2f42" },
+        },
+        yTime: {
+          type: "linear",
+          position: "right",
+          beginAtZero: true,
+          ticks: { color: "#ff8b8b" },
+          grid: { display: false },
+        },
+      },
+      plugins: {
+        legend: { labels: { color: "#e7eaf3", boxWidth: 14 }, position: "bottom" },
+        tooltip: {
+          callbacks: {
+            label: c => {
+              if (c.dataset.label === t.label_time) {
+                return `${t.label_time}: ${models_data[c.dataIndex].time}`;
+              }
+              return `${c.dataset.label}: ${c.parsed.y}`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+// ----- 6. Table -----
+function renderTable() {
+  const tbody = document.querySelector("#dataTable tbody");
+  tbody.innerHTML = "";
+  const subsets = getAllSubsets();
+
+  // Default sort by OVERALL descending
+  const sorted = [...models_data].sort((a, b) => b.overall - a.overall);
+  sorted.forEach(m => {
+    const tr = document.createElement("tr");
+    let html = `<td>${m.model}</td><td>${pillFor(m.overall)}</td>`;
+    subsets.forEach(s => {
+      html += `<td>${pillFor(getScore(m, s))}</td>`;
+    });
+    html += `<td>${m.vram}</td><td>${m.ctx}k</td><td>${m.time}</td>`;
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  });
+}
+
+function setupSorting() {
+  const table = document.getElementById("dataTable");
+  const ths = table.querySelectorAll("th");
+  const subsets = getAllSubsets();
+  const allKeys = ['model', 'overall', ...subsets, 'vram', 'ctx', 'time'];
+
+  ths.forEach(th => {
+    th.addEventListener("click", () => {
+      const key = th.dataset.key;
+      if (!key || !allKeys.includes(key)) return;
+
+      const isNum = th.dataset.num === "1";
+      const isAsc = !th.classList.contains("sorted-asc");
+
+      ths.forEach(x => x.classList.remove("sorted-asc", "sorted-desc"));
+      th.classList.add(isAsc ? "sorted-asc" : "sorted-desc");
+
+      const sorted = [...models_data].sort((a, b) => {
+        let va, vb;
+        if (key === 'overall') {
+          va = a.overall; vb = b.overall;
+        } else if (key === 'model') {
+          va = a.model; vb = b.model;
+        } else if (key === 'time') {
+          va = timeToMin(a.time); vb = timeToMin(b.time);
+        } else if (subsets.includes(key)) {
+          va = getScore(a, key); vb = getScore(b, key);
+          if (va === null) va = -1;
+          if (vb === null) vb = -1;
+        } else {
+          va = a[key]; vb = b[key];
+        }
+
+        if (isNum) return isAsc ? va - vb : vb - va;
+        return isAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+      });
+
+      const tbody = table.querySelector("tbody");
+      tbody.innerHTML = "";
+
+      sorted.forEach(m => {
+        const tr = document.createElement("tr");
+        let html = `<td>${m.model}</td><td>${pillFor(m.overall)}</td>`;
+        subsets.forEach(s => {
+          html += `<td>${pillFor(getScore(m, s))}</td>`;
+        });
+        html += `<td>${m.vram}</td><td>${m.ctx}k</td><td>${m.time}</td>`;
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+      });
+    });
+  });
+}
+
+function reRender() {
+  destroyCharts();
+  renderCards();
+  renderRadar();
+  renderSubsetBar();
+  renderSpeedBar();
+  renderResBar();
+  renderTable();
+}
+
+function init() {
+  applyI18n();
+  renderCards();
+  renderRadar();
+  renderSubsetBar();
+  renderSpeedBar();
+  renderResBar();
+  renderTable();
+  setupSorting();
+  // Mark OVERALL column as default sorted descending
+  const overallTh = document.querySelector('th[data-key="overall"]');
+  if (overallTh) overallTh.classList.add('sorted-desc');
+}
+
+init();
+</script>
+</body>
+</html>
