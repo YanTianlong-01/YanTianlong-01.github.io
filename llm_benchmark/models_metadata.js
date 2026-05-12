@@ -180,5 +180,23 @@ const models_data = [
       "irrelevance": 0.90,
       "multi_turn_base": null
     }
+  },
+  {
+    "id": "deepseek-v4-flash",
+    "model": "DeepSeek-API / deepseek-v4-flash",
+    "short": "deepseek-v4-flash",
+    "overall": 0.6192,
+    "prefill": null,
+    "decode": null,
+    "vram": null,
+    "ctx": 1000,
+    "time": "11:52",
+    "scores": {
+      "parallel_multiple": 0.86,
+      "javascript": 0.6,
+      "live_parallel_multiple": 0.5833,
+      "irrelevance": 0.58,
+      "multi_turn_base": null
+    }
   }
 ];
