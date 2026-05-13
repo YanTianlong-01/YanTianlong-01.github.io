@@ -93,6 +93,142 @@
     border-color: var(--accent);
   }
 
+  /* ---- Filter Panel ---- */
+  .filter-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .filter-panel summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    user-select: none;
+  }
+
+  .filter-panel summary:hover { color: var(--accent); }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+    margin-top: 12px;
+  }
+
+  .filter-col {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .filter-col h5 {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: var(--text-soft);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .model-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .model-checks label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .model-checks label:hover { border-color: var(--accent); }
+
+  .model-checks input[type="checkbox"] {
+    accent-color: var(--accent);
+    pointer-events: none;
+  }
+
+  .model-checks label.has-check { background: rgba(122,162,255,0.12); border-color: rgba(122,162,255,0.3); }
+
+  .topn-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .topn-row input[type="number"] {
+    width: 60px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .topn-row input[type="number"]:focus { outline: 1px solid var(--accent); }
+
+  .topn-toggle {
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text-soft);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+
+  .topn-toggle.active {
+    background: var(--accent);
+    color: #0b1020;
+    border-color: var(--accent);
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .filter-actions button {
+    padding: 3px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text-soft);
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s;
+  }
+
+  .filter-actions button:hover { border-color: var(--accent); color: var(--text); }
+
+  .visible-count {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-left: auto;
+    align-self: center;
+  }
+
+  /* ---- End Filter Panel ---- */
+
   .section-title {
     font-size: 18px;
     margin: 36px 0 14px;
@@ -305,6 +441,31 @@
   <span class="tag" data-i18n="tag_temp">temperature = 0</span>
 </div>
 
+<!-- Filter Panel -->
+<details class="filter-panel" open>
+  <summary data-i18n="filter_title">⚙ Filter Models</summary>
+  <div class="filter-row">
+    <div class="filter-col">
+      <h5 data-i18n="filter_select">Select Models</h5>
+      <div class="model-checks" id="model-checks"></div>
+    </div>
+    <div class="filter-col" style="max-width:260px;">
+      <h5 data-i18n="filter_topn">Top N Models</h5>
+      <div class="topn-row">
+        <button class="topn-toggle" id="topn-btn" onclick="toggleTopN()">OFF</button>
+        <input type="number" id="topn-input" min="1" max="99" value="5" disabled />
+        <span style="font-size:12px;color:var(--text-soft)" data-i18n="filter_topn_hint">by OVERALL score</span>
+      </div>
+    </div>
+  </div>
+  <div class="filter-actions">
+    <button onclick="selectAllModels()" data-i18n="filter_all">All</button>
+    <button onclick="deselectAllModels()" data-i18n="filter_none">None</button>
+    <button onclick="resetFilters()" data-i18n="filter_reset">Reset</button>
+    <span class="visible-count" id="visible-count"></span>
+  </div>
+</details>
+
 <h2 class="section-title" data-i18n="sec_overview">Overview</h2>
 <div class="cards" id="cards"></div>
 
@@ -400,7 +561,15 @@ const i18n = {
     label_live: "LIVE",
     label_duration: "Duration",
     label_multi_turn: "multi_turn_base",
-    na: "-"
+    na: "-",
+    filter_title: "⚙ Filter Models",
+    filter_select: "Select Models",
+    filter_topn: "Top N Models",
+    filter_topn_hint: "by OVERALL score",
+    filter_all: "All",
+    filter_none: "None",
+    filter_reset: "Reset",
+    filter_count: "Showing {n} of {total} models"
   },
   zh: {
     title: "Qwen3.6-27B 量化版本 · BFCL-v3 评测可视化",
@@ -440,31 +609,117 @@ const i18n = {
     label_live: "LIVE",
     label_duration: "耗时",
     label_multi_turn: "multi_turn_base",
-    na: "-"
+    na: "-",
+    filter_title: "⚙ 筛选模型",
+    filter_select: "选择模型",
+    filter_topn: "前 N 名模型",
+    filter_topn_hint: "按总分排序",
+    filter_all: "全选",
+    filter_none: "清空",
+    filter_reset: "重置",
+    filter_count: "显示 {n} / {total} 个模型"
   }
 };
 
 let currentLang = 'en';
 let charts = {};
 
-function setLang(lang) {
-  currentLang = lang;
-  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-  document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
-  applyI18n();
-  reRender();
+// ----- Filter State -----
+let selectedModelIds = new Set(models_data.map(m => m.id));
+let topNEnabled = false;
+
+function getVisibleModels() {
+  let models = [...models_data];
+
+  // Apply checkbox filter
+  if (!selectedModelIds.has('__all__')) {
+    models = models.filter(m => selectedModelIds.has(m.id));
+  }
+
+  // Apply Top-N filter
+  if (topNEnabled) {
+    const n = parseInt(document.getElementById('topn-input').value) || models_data.length;
+    models.sort((a, b) => b.overall - a.overall);
+    models = models.slice(0, n);
+  }
+
+  return models;
 }
 
-function applyI18n() {
+function updateVisibleCount() {
+  const visible = getVisibleModels();
   const t = i18n[currentLang];
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    if (t[key]) el.textContent = t[key];
+  const el = document.getElementById('visible-count');
+  el.textContent = t.filter_count.replace('{n}', visible.length).replace('{total}', models_data.length);
+}
+
+function rebuildCheckboxes() {
+  const container = document.getElementById('model-checks');
+  container.innerHTML = '';
+  const sorted = [...models_data].sort((a, b) => b.overall - a.overall);
+  sorted.forEach(m => {
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = m.id;
+    cb.checked = selectedModelIds.has(m.id);
+    cb.addEventListener('change', () => {
+      if (cb.checked) selectedModelIds.add(m.id);
+      else selectedModelIds.delete(m.id);
+      label.classList.toggle('has-check', cb.checked);
+      applyFilters();
+    });
+    label.classList.add('has-check');
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(m.short));
+    container.appendChild(label);
   });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    const key = el.dataset.i18nHtml;
-    if (t[key]) el.innerHTML = t[key];
+}
+
+function selectAllModels() {
+  models_data.forEach(m => selectedModelIds.add(m.id));
+  document.querySelectorAll('#model-checks input[type="checkbox"]').forEach(cb => {
+    cb.checked = true;
+    cb.closest('label').classList.add('has-check');
   });
+  applyFilters();
+}
+
+function deselectAllModels() {
+  selectedModelIds.clear();
+  document.querySelectorAll('#model-checks input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+    cb.closest('label').classList.remove('has-check');
+  });
+  applyFilters();
+}
+
+function resetFilters() {
+  models_data.forEach(m => selectedModelIds.add(m.id));
+  topNEnabled = false;
+  document.getElementById('topn-btn').classList.remove('active');
+  document.getElementById('topn-btn').textContent = 'OFF';
+  document.getElementById('topn-input').disabled = true;
+  document.querySelectorAll('#model-checks input[type="checkbox"]').forEach(cb => {
+    cb.checked = true;
+    cb.closest('label').classList.add('has-check');
+  });
+  applyFilters();
+}
+
+function toggleTopN() {
+  topNEnabled = !topNEnabled;
+  const btn = document.getElementById('topn-btn');
+  const input = document.getElementById('topn-input');
+  btn.classList.toggle('active', topNEnabled);
+  btn.textContent = topNEnabled ? 'ON' : 'OFF';
+  input.disabled = !topNEnabled;
+  applyFilters();
+}
+
+function applyFilters() {
+  updateVisibleCount();
+  reRender();
 }
 
 // ----- helpers -----
@@ -530,11 +785,11 @@ function destroyCharts() {
 }
 
 // ----- 1. Overview cards -----
-function renderCards() {
+function renderCards(visibleModels) {
   const container = document.getElementById("cards");
   container.innerHTML = "";
   const t = i18n[currentLang];
-  const sorted = [...models_data].sort((a, b) => b.overall - a.overall);
+  const sorted = [...visibleModels].sort((a, b) => b.overall - a.overall);
 
   sorted.forEach((m, idx) => {
     const card = document.createElement("div");
@@ -571,11 +826,11 @@ function renderCards() {
 }
 
 // ----- 2. Radar chart -----
-function renderRadar() {
+function renderRadar(visibleModels) {
   const ctx = document.getElementById("radarChart");
   const subsets = getAllSubsets().filter(s => s !== 'multi_turn_base' && s !== 'multi_turn_long_context');
 
-  const datasets = models_data.map((m, i) => ({
+  const datasets = visibleModels.map((m, i) => ({
     label: m.short,
     data: subsets.map(s => getScore(m, s) ?? 0),
     borderColor: palette[i % palette.length],
@@ -623,11 +878,11 @@ function renderRadar() {
 }
 
 // ----- 3. Subset bar chart -----
-function renderSubsetBar() {
+function renderSubsetBar(visibleModels) {
   const ctx = document.getElementById("subsetBar");
   const subsets = getAllSubsets().filter(s => s !== 'multi_turn_base' && s !== 'multi_turn_long_context');
 
-  const datasets = models_data.map((m, i) => ({
+  const datasets = visibleModels.map((m, i) => ({
     label: m.short,
     data: subsets.map(s => getScore(m, s) ?? 0),
     backgroundColor: palette[i % palette.length],
@@ -669,10 +924,10 @@ function renderSubsetBar() {
 }
 
 // ----- 4. Speed chart -----
-function renderSpeedBar() {
+function renderSpeedBar(visibleModels) {
   const ctx = document.getElementById("speedBar");
   const t = i18n[currentLang];
-  const labels = models_data.map(m => m.short);
+  const labels = visibleModels.map(m => m.short);
 
   charts.speed = new Chart(ctx, {
     type: "bar",
@@ -681,14 +936,14 @@ function renderSpeedBar() {
       datasets: [
         {
           label: t.label_prefill + " (t/s)",
-          data: models_data.map(m => m.prefill),
+          data: visibleModels.map(m => m.prefill),
           backgroundColor: "#7aa2ff",
           borderRadius: 4,
           yAxisID: "yPrefill",
         },
         {
           label: t.label_decode + " (t/s)",
-          data: models_data.map(m => m.decode),
+          data: visibleModels.map(m => m.decode),
           backgroundColor: "#79e2c1",
           borderRadius: 4,
           yAxisID: "yDecode",
@@ -723,10 +978,10 @@ function renderSpeedBar() {
 }
 
 // ----- 5. Resource chart -----
-function renderResBar() {
+function renderResBar(visibleModels) {
   const ctx = document.getElementById("resBar");
   const t = i18n[currentLang];
-  const labels = models_data.map(m => m.short);
+  const labels = visibleModels.map(m => m.short);
 
   charts.res = new Chart(ctx, {
     type: "bar",
@@ -735,14 +990,14 @@ function renderResBar() {
       datasets: [
         {
           label: t.label_vram,
-          data: models_data.map(m => m.vram),
+          data: visibleModels.map(m => m.vram),
           backgroundColor: "#f5c451",
           borderRadius: 4,
           yAxisID: "yVram",
         },
         {
           label: t.label_time,
-          data: models_data.map(m => timeToMin(m.time)),
+          data: visibleModels.map(m => timeToMin(m.time)),
           backgroundColor: "#ff8b8b",
           borderRadius: 4,
           yAxisID: "yTime",
@@ -775,7 +1030,7 @@ function renderResBar() {
           callbacks: {
             label: c => {
               if (c.dataset.label === t.label_time) {
-                return `${t.label_time}: ${models_data[c.dataIndex].time}`;
+                return `${t.label_time}: ${visibleModels[c.dataIndex].time}`;
               }
               return `${c.dataset.label}: ${c.parsed.y}`;
             },
@@ -787,13 +1042,13 @@ function renderResBar() {
 }
 
 // ----- 6. Table -----
-function renderTable() {
+function renderTable(visibleModels) {
   const tbody = document.querySelector("#dataTable tbody");
   tbody.innerHTML = "";
   const subsets = getAllSubsets();
 
   // Default sort by OVERALL descending
-  const sorted = [...models_data].sort((a, b) => b.overall - a.overall);
+  const sorted = [...visibleModels].sort((a, b) => b.overall - a.overall);
   sorted.forEach(m => {
     const tr = document.createElement("tr");
     let html = `<td>${m.model}</td><td>${pillFor(m.overall)}</td>`;
@@ -806,7 +1061,7 @@ function renderTable() {
   });
 }
 
-function setupSorting() {
+function setupSorting(visibleModels) {
   const table = document.getElementById("dataTable");
   const ths = table.querySelectorAll("th");
   const subsets = getAllSubsets();
@@ -823,7 +1078,7 @@ function setupSorting() {
       ths.forEach(x => x.classList.remove("sorted-asc", "sorted-desc"));
       th.classList.add(isAsc ? "sorted-asc" : "sorted-desc");
 
-      const sorted = [...models_data].sort((a, b) => {
+      const sorted = [...visibleModels].sort((a, b) => {
         let va, vb;
         if (key === 'overall') {
           va = a.overall; vb = b.overall;
@@ -861,24 +1116,50 @@ function setupSorting() {
 }
 
 function reRender() {
+  const visible = getVisibleModels();
   destroyCharts();
-  renderCards();
-  renderRadar();
-  renderSubsetBar();
-  renderSpeedBar();
-  renderResBar();
-  renderTable();
+  renderCards(visible);
+  renderRadar(visible);
+  renderSubsetBar(visible);
+  renderSpeedBar(visible);
+  renderResBar(visible);
+  renderTable(visible);
+  setupSorting(visible);
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+  applyI18n();
+  rebuildCheckboxes();
+  reRender();
+}
+
+function applyI18n() {
+  const t = i18n[currentLang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.dataset.i18nHtml;
+    if (t[key]) el.innerHTML = t[key];
+  });
 }
 
 function init() {
   applyI18n();
-  renderCards();
-  renderRadar();
-  renderSubsetBar();
-  renderSpeedBar();
-  renderResBar();
-  renderTable();
-  setupSorting();
+  rebuildCheckboxes();
+  const visible = getVisibleModels();
+  renderCards(visible);
+  renderRadar(visible);
+  renderSubsetBar(visible);
+  renderSpeedBar(visible);
+  renderResBar(visible);
+  renderTable(visible);
+  setupSorting(visible);
+  updateVisibleCount();
   // Mark OVERALL column as default sorted descending
   const overallTh = document.querySelector('th[data-key="overall"]');
   if (overallTh) overallTh.classList.add('sorted-desc');
