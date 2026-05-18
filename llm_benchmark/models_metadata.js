@@ -198,5 +198,24 @@ const models_data = [
       "irrelevance": 0.58,
       "multi_turn_base": null
     }
-  }
+  },
+  {
+    "id": "4bpw-16gb-vram-mtp",
+    "model": "ggufbench / Qwen3.6-27B-4bpw-16GB-VRAM-mtp",
+    "short": "4bpw-16GB-VRAM-mtp",
+    "overall": 0.8334,
+    "prefill": 1300,
+    "decode": 80,
+    "vram": 15.4,
+    "ctx": 32,
+    "time": "39:50",
+    "scores": {
+      "parallel_multiple": 0.94,
+      "javascript": 0.72,
+      "live_parallel_multiple": 0.7917,
+      "irrelevance": 0.92,
+      "multi_turn_base": null,
+      "multi_turn_long_context": null
+    }
+  },
 ];
