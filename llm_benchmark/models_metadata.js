@@ -9,6 +9,7 @@ const models_data = [
     "vram": 15.1,
     "ctx": 150,
     "time": "56:24",
+    "hf_link": "https://huggingface.co/ManniX-ITA/Qwen3.6-27B-Omnimerge-v4-GGUF",
     "scores": {
       "parallel_multiple": 0.92,
       "javascript": 0.72,
@@ -27,6 +28,7 @@ const models_data = [
     "vram": 15.5,
     "ctx": 80,
     "time": "46:42",
+    "hf_link": "https://huggingface.co/unsloth/Qwen3.6-27B-GGUF",
     "scores": {
       "parallel_multiple": 0.94,
       "javascript": 0.74,
@@ -45,6 +47,7 @@ const models_data = [
     "vram": 15.1,
     "ctx": 100,
     "time": "57:48",
+    "hf_link": "https://huggingface.co/ggufbench/Qwen3.6-27B-4bpw-16GB-VRAM",
     "scores": {
       "parallel_multiple": 0.92,
       "javascript": 0.74,
@@ -64,6 +67,7 @@ const models_data = [
     "vram": 15.4,
     "ctx": 80,
     "time": "1:00:04",
+    "hf_link": "https://huggingface.co/Ununnilium/Qwen3.6-27B-IQ4_XS-pure-GGUF",
     "scores": {
       "parallel_multiple": 0.92,
       "javascript": 0.74,
@@ -83,6 +87,7 @@ const models_data = [
     "vram": 14.4,
     "ctx": 100,
     "time": "1:06:29",
+    "hf_link": "https://huggingface.co/DavidAU/Qwen3.6-27B-NEO-CODE-Di-IMatrix-MAX-GGUF",
     "scores": {
       "parallel_multiple": 0.92,
       "javascript": 0.74,
@@ -101,6 +106,7 @@ const models_data = [
     "vram": 14.9,
     "ctx": 100,
     "time": "26:59",
+    "hf_link": "https://huggingface.co/rico03/Qwen3.6-27B-Claude-Opus-Reasoning-Distilled-GGUF",
     "scores": {
       "parallel_multiple": 0.82,
       "javascript": 0.74,
@@ -119,6 +125,7 @@ const models_data = [
     "vram": 14.9,
     "ctx": 100,
     "time": "42:23",
+    "hf_link": "https://huggingface.co/TeichAI/Qwen3.6-27B-Claude-Opus-Reasoning-Distill-v2-GGUF",
     "scores": {
       "parallel_multiple": 0.92,
       "javascript": 0.74,
@@ -137,6 +144,7 @@ const models_data = [
     "vram": 14.5,
     "ctx": 150,
     "time": "48:41",
+    "hf_link": "https://huggingface.co/unsloth/Qwen3.6-27B-GGUF",
     "scores": {
       "parallel_multiple": 0.96,
       "javascript": 0.76,
@@ -155,6 +163,7 @@ const models_data = [
     "vram": 15.3,
     "ctx": 80,
     "time": "51:01",
+    "hf_link": "https://huggingface.co/zlaabsi/Qwen3.6-27B-OTQ-GGUF",
     "scores": {
       "parallel_multiple": 0.88,
       "javascript": 0.74,
@@ -173,6 +182,7 @@ const models_data = [
     "vram": 15.4,
     "ctx": 80,
     "time": "1:01:22",
+    "hf_link": "https://huggingface.co/sokann/Qwen3.6-27B-GGUF-4.256bpw",
     "scores": {
       "parallel_multiple": 0.94,
       "javascript": 0.70,
@@ -191,6 +201,7 @@ const models_data = [
     "vram": null,
     "ctx": 1000,
     "time": "11:52",
+    "hf_link": "https://platform.deepseek.com/",
     "scores": {
       "parallel_multiple": 0.86,
       "javascript": 0.6,
@@ -209,6 +220,7 @@ const models_data = [
     "vram": 15.4,
     "ctx": 32,
     "time": "39:50",
+    "hf_link": "https://huggingface.co/ggufbench/Qwen3.6-27B-4bpw-16GB-VRAM",
     "scores": {
       "parallel_multiple": 0.94,
       "javascript": 0.72,
@@ -228,6 +240,7 @@ const models_data = [
     "vram": 14.5,
     "ctx": 100,
     "time": "44:49",
+    "hf_link": "https://huggingface.co/bartowski/Qwen_Qwen3.6-27B-GGUF",
     "scores": {
       "parallel_multiple": 0.96,
       "javascript": 0.74,
