@@ -218,4 +218,23 @@ const models_data = [
       "multi_turn_long_context": null
     }
   },
+  {
+    "id": "bartowski-IQ3_XXS",
+    "model": "bartowski / Qwen3.6-27B-IQ3_XXS",
+    "short": "bartowski-IQ3_XXS",
+    "overall": 0.8183,
+    "prefill": 1500,
+    "decode": 48,
+    "vram": 14.5,
+    "ctx": 100,
+    "time": "44:49",
+    "scores": {
+      "parallel_multiple": 0.96,
+      "javascript": 0.74,
+      "live_parallel_multiple": 0.7919,
+      "irrelevance": 0.96,
+      "multi_turn_base": null,
+      "multi_turn_long_context": null
+    }
+  },
 ];
