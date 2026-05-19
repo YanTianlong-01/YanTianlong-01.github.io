@@ -22,6 +22,66 @@
     --shadow: 0 6px 24px rgba(0,0,0,0.35);
   }
 
+  [data-theme="light"] {
+    --bg: #f5f7fa;
+    --bg-soft: #e8ecf1;
+    --bg-card: #ffffff;
+    --border: #d0d7e2;
+    --text: #1a1d26;
+    --text-soft: #5a6275;
+    --accent: #4a7cff;
+    --accent-2: #2db88a;
+    --warn: #e0943b;
+    --bad: #e05555;
+    --shadow: 0 6px 24px rgba(0,0,0,0.08);
+  }
+
+  [data-theme="light"] .card.clickable:hover {
+    box-shadow: 0 6px 32px rgba(74,124,255,0.15);
+  }
+
+  [data-theme="light"] table.data-table tr:hover td {
+    background: rgba(74, 124, 255, 0.05);
+  }
+
+  [data-theme="light"] .model-checks label.has-check {
+    background: rgba(74,124,255,0.1);
+    border-color: rgba(74,124,255,0.35);
+  }
+
+  [data-theme="light"] .lang-toggle button.active {
+    color: #ffffff;
+  }
+
+  [data-theme="light"] .topn-toggle.active {
+    color: #ffffff;
+  }
+
+  [data-theme="light"] .card .rank-badge {
+    color: #ffffff;
+  }
+
+  [data-theme="light"] .card .rank-badge.gold { color: #1a1d26; }
+  [data-theme="light"] .card .rank-badge.silver { color: #1a1d26; }
+  [data-theme="light"] .card .rank-badge.bronze { color: #ffffff; }
+
+  [data-theme="light"] .pill {
+    background: rgba(74,124,255,0.1);
+    border-color: rgba(74,124,255,0.25);
+  }
+
+  [data-theme="light"] .legend-tags .tag {
+    background: rgba(74,124,255,0.06);
+    border-color: rgba(74,124,255,0.25);
+  }
+
+  [data-theme="light"] .topn-row input[type="number"] {
+    color: var(--text);
+  }
+
+  [data-theme="light"] ::-moz-selection { background: rgba(74,124,255,0.25); }
+  [data-theme="light"] ::selection { background: rgba(74,124,255,0.25); }
+
   * { box-sizing: border-box; }
 
   html, body {
@@ -464,6 +524,11 @@
     <label>Language:</label>
     <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
     <button id="btn-zh" onclick="setLang('zh')">中文</button>
+  </div>
+  <div class="lang-toggle">
+    <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme" style="font-size:15px;padding:4px 10px;">
+      <span id="theme-icon">🌙</span>
+    </button>
   </div>
 </header>
 
@@ -1198,6 +1263,7 @@ function applyI18n() {
 }
 
 function init() {
+  applyTheme();
   applyI18n();
   rebuildCheckboxes();
   const visible = getVisibleModels();
@@ -1212,7 +1278,123 @@ function init() {
   // Mark OVERALL column as default sorted descending
   const overallTh = document.querySelector('th[data-key="overall"]');
   if (overallTh) overallTh.classList.add('sorted-desc');
+  // Apply chart colors matching current theme
+  applyChartTheme();
 }
+
+// ---- Theme toggle (3 states: dark → light → auto) ----
+function getSystemTheme() {
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function resolveTheme(mode) {
+  // mode: 'dark' | 'light' | 'auto' | null
+  if (!mode || mode === 'auto') return getSystemTheme();
+  return mode;
+}
+
+function chartTheme() {
+  const theme = document.documentElement.getAttribute('data-theme');
+  return theme === 'light' ? {
+    tickColor: '#5a6275',
+    gridColor: '#d0d7e2',
+    legendColor: '#1a1d26',
+    accent: '#4a7cff',
+    accent2: '#2db88a',
+    gold: '#d4a017',
+    bad: '#e05555'
+  } : {
+    tickColor: '#aab0c0',
+    gridColor: '#2a2f42',
+    legendColor: '#e7eaf3',
+    accent: '#7aa2ff',
+    accent2: '#79e2c1',
+    gold: '#f5c451',
+    bad: '#ff8b8b'
+  };
+}
+
+function applyChartTheme() {
+  const ct = chartTheme();
+  Object.values(charts).forEach(chart => {
+    if (!chart) return;
+    const o = chart.options;
+    if (o.scales) {
+      Object.values(o.scales).forEach(scale => {
+        if (scale.ticks) scale.ticks.color = ct.tickColor;
+        if (scale.grid && scale.grid.display !== false) scale.grid.color = ct.gridColor;
+        if (scale.angleLines) scale.angleLines.color = ct.gridColor;
+        if (scale.pointLabels) scale.pointLabels.color = ct.legendColor;
+      });
+    }
+    if (o.plugins && o.plugins.legend && o.plugins.legend.labels) {
+      o.plugins.legend.labels.color = ct.legendColor;
+    }
+    // Update dataset colors for speed chart
+    if (chart.data.datasets) {
+      chart.data.datasets.forEach((ds, i) => {
+        if (chart === charts.speed) {
+          ds.backgroundColor = i === 0 ? ct.accent : ct.accent2;
+          if (ds.borderColor) ds.borderColor = ds.backgroundColor;
+        }
+        if (chart === charts.res) {
+          ds.backgroundColor = i === 0 ? ct.gold : ct.bad;
+          if (ds.borderColor) ds.borderColor = ds.backgroundColor;
+        }
+      });
+    }
+    chart.update('none');
+  });
+}
+
+function updateThemeUI(mode) {
+  // mode: 'dark' | 'light' | 'auto'
+  const icon = document.getElementById('theme-icon');
+  const btn = document.getElementById('theme-toggle');
+  if (mode === 'auto') {
+    icon.textContent = '🔄';
+    btn.title = 'Theme: Follow System (click to change)';
+  } else if (mode === 'light') {
+    icon.textContent = '☀️';
+    btn.title = 'Theme: Light (click to change)';
+  } else {
+    icon.textContent = '🌙';
+    btn.title = 'Theme: Dark (click to change)';
+  }
+}
+
+function applyTheme() {
+  const saved = localStorage.getItem('benchmark-theme');
+  const mode = saved || 'auto';
+  const theme = resolveTheme(mode);
+  document.documentElement.setAttribute('data-theme', theme);
+  updateThemeUI(mode);
+}
+
+function toggleTheme() {
+  const saved = localStorage.getItem('benchmark-theme') || 'auto';
+  // Cycle: auto → dark → light → auto
+  let next;
+  if (saved === 'auto') next = 'dark';
+  else if (saved === 'dark') next = 'light';
+  else next = 'auto';
+
+  localStorage.setItem('benchmark-theme', next);
+  const resolved = resolveTheme(next);
+  document.documentElement.setAttribute('data-theme', resolved);
+  updateThemeUI(next);
+  applyChartTheme();
+}
+
+// Listen for system theme changes
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+  const saved = localStorage.getItem('benchmark-theme');
+  if (!saved || saved === 'auto') {
+    const theme = e.matches ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+    applyChartTheme();
+  }
+});
 
 init();
 </script>
