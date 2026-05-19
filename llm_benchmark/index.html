@@ -457,12 +457,14 @@
   </div>
 </header>
 
-<div class="legend-tags" id="legend-tags">
+ <div class="legend-tags" id="legend-tags">
   <span class="tag" data-i18n="tag_local">Local OpenAI API @ 1235</span>
   <span class="tag" data-i18n="tag_eval">EvalScope BFCL-v3</span>
   <span class="tag" data-i18n="tag_type">Agent / Function Calling</span>
   <span class="tag" data-i18n="tag_temp">temperature = 0</span>
 </div>
+
+<p data-i18n="description" style="color:var(--text-soft);font-size:14px;margin:12px 0 0;line-height:1.7;"></p>
 
 <!-- Filter Panel -->
 <details class="filter-panel">
@@ -547,8 +549,9 @@
 // ----- i18n -----
 const i18n = {
   en: {
-    title: "Qwen3.6-27B Quantized Versions · BFCL-v3 Evaluation Visualization",
+    title: "Qwen3.6-27B Quantized Versions · BFCL-v3 Evaluation Visualization (16GB VRAM)",
     subtitle: "174 test samples",
+    description: "This benchmark evaluates the tool-calling (function calling) capabilities of Qwen3.6-27B quantized versions that fit entirely within a 16GB VRAM GPU. All models run locally on an RTX 5070 Ti.",
     gh_source: "Benchmark Scripts",
     tag_local: "Local OpenAI API @ 1235",
     tag_eval: "EvalScope BFCL-v3",
@@ -596,8 +599,9 @@ const i18n = {
     filter_count: "Showing {n} of {total} models"
   },
   zh: {
-    title: "Qwen3.6-27B 量化版本 · BFCL-v3 评测可视化",
+    title: "Qwen3.6-27B 量化版本 · BFCL-v3 评测可视化 (16GB VRAM)",
     subtitle: "174 个测试样本",
+    description: "本评测旨在测试能够完全加载到 16GB 显存 GPU 上的 Qwen3.6-27B 量化版本模型的工具调用（Function Calling）能力。所有模型均在本地 RTX 5070 Ti 上运行。",
     gh_source: "评测脚本",
     tag_local: "本地 OpenAI API @ 1235",
     tag_eval: "EvalScope BFCL-v3",
