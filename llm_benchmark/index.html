@@ -469,11 +469,7 @@
 <!-- Filter Panel -->
 <details class="filter-panel">
   <summary data-i18n="filter_title">Filter Models</summary>
-  <div class="filter-row">
-    <div class="filter-col">
-      <h5 data-i18n="filter_select">Select Models</h5>
-      <div class="model-checks" id="model-checks"></div>
-    </div>
+  <div class="filter-row" style="margin-bottom:12px;">
     <div class="filter-col" style="max-width:260px;">
       <h5 data-i18n="filter_topn">Top N Models</h5>
       <div class="topn-row">
@@ -481,6 +477,12 @@
         <input type="number" id="topn-input" min="1" max="99" value="10" />
         <span style="font-size:12px;color:var(--text-soft)" data-i18n="filter_topn_hint">by OVERALL score</span>
       </div>
+    </div>
+  </div>
+  <div class="filter-row">
+    <div class="filter-col">
+      <h5 data-i18n="filter_select">Select Models</h5>
+      <div class="model-checks" id="model-checks"></div>
     </div>
   </div>
   <div class="filter-actions">
