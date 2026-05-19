@@ -582,7 +582,7 @@
   <span class="tag" data-i18n="tag_temp">temperature = 0</span>
 </div>
 
-<p data-i18n="description" style="color:var(--text-soft);font-size:14px;margin:12px 0 0;line-height:1.7;"></p>
+<p data-i18n="description" style="color:var(--text-soft);font-size:14px;margin:12px 0 24px;line-height:1.7;"></p>
 
 <!-- Filter Panel -->
 <details class="filter-panel">
@@ -1296,6 +1296,7 @@ function reRender() {
 
 function setLang(lang) {
   currentLang = lang;
+  localStorage.setItem('benchmark-lang', lang);
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
   applyI18n();
@@ -1316,6 +1317,11 @@ function applyI18n() {
 }
 
 function init() {
+  // Restore saved language
+  const savedLang = localStorage.getItem('benchmark-lang');
+  if (savedLang && i18n[savedLang]) currentLang = savedLang;
+  document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
+  document.getElementById('btn-zh').classList.toggle('active', currentLang === 'zh');
   applyTheme();
   applyI18n();
   rebuildCheckboxes();
