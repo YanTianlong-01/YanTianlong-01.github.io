@@ -856,6 +856,7 @@ function deselectAllModels() {
 function resetFilters() {
   models_data.forEach(m => selectedModelIds.add(m.id));
   topNEnabled = false;
+  localStorage.setItem('benchmark-topn', '0');
   document.getElementById('topn-btn').classList.remove('active');
   document.getElementById('topn-btn').textContent = 'OFF';
   document.getElementById('topn-input').disabled = true;
@@ -868,6 +869,7 @@ function resetFilters() {
 
 function toggleTopN() {
   topNEnabled = !topNEnabled;
+  localStorage.setItem('benchmark-topn', topNEnabled ? '1' : '0');
   const btn = document.getElementById('topn-btn');
   const input = document.getElementById('topn-input');
   btn.classList.toggle('active', topNEnabled);
@@ -1326,6 +1328,18 @@ function init() {
   applyTheme();
   applyI18n();
   rebuildCheckboxes();
+
+  // Restore Top-N state
+  const savedTopN = localStorage.getItem('benchmark-topn');
+  if (savedTopN !== null) {
+    topNEnabled = savedTopN === '1';
+  }
+  const topnBtn = document.getElementById('topn-btn');
+  const topnInput = document.getElementById('topn-input');
+  topnBtn.classList.toggle('active', topNEnabled);
+  topnBtn.textContent = topNEnabled ? 'ON' : 'OFF';
+  topnInput.disabled = !topNEnabled;
+
   const visible = getVisibleModels();
   renderCards(visible);
   renderRadar(visible);
