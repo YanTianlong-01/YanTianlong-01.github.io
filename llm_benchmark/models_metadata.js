@@ -250,4 +250,24 @@ const models_data = [
       "multi_turn_long_context": null
     }
   },
+  {
+    "id": "prism-pro-dq",
+    "model": "Ex0bit / Qwen3.6-27B-PRISM-PRO-DQ",
+    "short": "PRISM-PRO-DQ",
+    "overall": 0.815,
+    "prefill": 1200,
+    "decode": 45,
+    "vram": 15.3,
+    "ctx": 100,
+    "time": "1:03:57",
+    "hf_link": "https://huggingface.co/Ex0bit/Qwen3.6-27B-PRISM-PRO-DQ",
+    "scores": {
+      "parallel_multiple": 0.94,
+      "javascript": 0.82,
+      "live_parallel_multiple": 0.75,
+      "irrelevance": 0.88,
+      "multi_turn_base": null,
+      "multi_turn_long_context": null
+    }
+  },
 ];
