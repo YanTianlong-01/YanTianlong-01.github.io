@@ -211,6 +211,44 @@ const models_data = [
     }
   },
   {
+    "id": "deepseek-v4-flash-thinking-high",
+    "model": "DeepSeek-API / deepseek-v4-flash-thinking-high",
+    "short": "deepseek-v4-flash-thinking-high",
+    "overall": 0.6159,
+    "prefill": null,
+    "decode": null,
+    "vram": null,
+    "ctx": 1000,
+    "time": "10:06",
+    "hf_link": "https://platform.deepseek.com/",
+    "scores": {
+      "parallel_multiple": 0.84,
+      "javascript": 0.64,
+      "live_parallel_multiple": 0.5417,
+      "irrelevance": 0.64,
+      "multi_turn_base": null
+    }
+  },
+  {
+    "id": "deepseek-v4-pro-thinking-high",
+    "model": "DeepSeek-API / deepseek-v4-pro-thinking-high",
+    "short": "deepseek-v4-pro-thinking-high",
+    "overall": 0.7783,
+    "prefill": null,
+    "decode": null,
+    "vram": null,
+    "ctx": 1000,
+    "time": "32:45",
+    "hf_link": "https://platform.deepseek.com/",
+    "scores": {
+      "parallel_multiple": 0.86,
+      "javascript": 0.6,
+      "live_parallel_multiple": 0.7917,
+      "irrelevance": 0.8,
+      "multi_turn_base": null
+    }
+  },
+  {
     "id": "4bpw-16gb-vram-mtp",
     "model": "ggufbench / Qwen3.6-27B-4bpw-16GB-VRAM-mtp",
     "short": "4bpw-16GB-VRAM-mtp",
